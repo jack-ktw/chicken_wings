@@ -2,8 +2,10 @@ import sys
 import os
 
 print sys.version
+import time
 
-world = '2b-prime'
+cur_time = time.ctime()
+world = '2A'
 node_file_path = os.getcwd() + "\\input\\world " + world + "\\nodes_world_" + world + ".txt"
 
 print "file path: ", node_file_path
@@ -64,7 +66,6 @@ for index, node in enumerate(adjacency_list):
     D_list[node[1]].append(index)
 print len(D_list)
 
-
 from collections import deque
 from bisect import bisect_left
 from pprint import pprint
@@ -107,10 +108,11 @@ def getPivot(P, X):
     rand_u = P.union(X).pop()
     return rand_u
     
-def BronKerboshcPivot(R, P, X, size):
+def BronKerboshcPivot(R, P, X, size, result):
     if (not P and not X):
         if len(R) > size[0]:
             size[0] = len(R)
+            result[0] = R
         print len(R)
         return
     u = getPivot(P, X)
@@ -118,19 +120,23 @@ def BronKerboshcPivot(R, P, X, size):
     tmp_P = set()
     while P:
         v = P.pop()
-        if not v in nu:
-            print "called:"
-            BronKerboshcPivot2(R.union(set([v])), P.union(tmp_P).union(set([v])).intersection(set(adjacency_list[v][0])), X.intersection(set(adjacency_list[v][0])), [0], size)
-            X.add(v)
-        else:
-            tmp_P.add(v)
+        degree = degree_list[v]
+        if degree > size[0] - 1:
+            if not v in nu:
+                print "called: ", degree, size[0]
+                BronKerboshcPivot2(R.union(set([v])), P.union(tmp_P).union(set([v])).intersection(set(adjacency_list[v][0])), X.intersection(set(adjacency_list[v][0])), [0], size, result)
+                X.add(v)
+            else:
+                tmp_P.add(v)
 
-def BronKerboshcPivot2(R, P, X, done, size):
+def BronKerboshcPivot2(R, P, X, done, size, result):
     if len(R) + len(P) < size[0]:
         return
     if (not P and not X):
+        if len(R) > size[0]:
+            size[0] = len(R)
+            result[0] = R
         print len(R)
-        done[0] = 1
         return
     u = getPivot(P, X)
     nu = set(adjacency_list[u][0])
@@ -138,7 +144,7 @@ def BronKerboshcPivot2(R, P, X, done, size):
     while P:
         v = P.pop()
         if not v in nu:
-            BronKerboshcPivot2(R.union(set([v])), P.union(tmp_P).union(set([v])).intersection(set(adjacency_list[v][0])), X.intersection(set(adjacency_list[v][0])), done, size)
+            BronKerboshcPivot2(R.union(set([v])), P.union(tmp_P).union(set([v])).intersection(set(adjacency_list[v][0])), X.intersection(set(adjacency_list[v][0])), done, size, result)
             X.add(v)
         else:
             tmp_P.add(v)
@@ -151,14 +157,26 @@ import profile
 sys.setrecursionlimit(3000)
 from itertools import islice
 i = 0
+size = [0]
+result = [set()]
 while i < len(degeneracy_list):
     v = degeneracy_list[i]
     post_set = set(islice(degeneracy_list, i+1, None))
     pre_set = set(islice(degeneracy_list, i))
     P = set(adjacency_list[v][0]).intersection(post_set)
     X = set(adjacency_list[v][0]).intersection(pre_set)
-    BronKerboshcPivot(set([v]), P, X, [0])
+    degree = degree_list[v]
+    if degree > size[0] - 1:
+        BronKerboshcPivot(set([v]), P, X, size, result)
     # profile.run('BronKerboshcPivot(set([v]), P, X)')
     i += 1
+print result
 
+result_path = os.getcwd() + "\\result.txt"
 
+with open(result_path, 'w') as f:
+    f.writelines([str(x) + "\n" for x in sorted(result[0])])
+
+finish_time = time.ctime()
+print finish_time
+print cur_time
