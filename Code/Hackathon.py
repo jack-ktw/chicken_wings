@@ -1,13 +1,6 @@
 import sys
 print sys.version
-
-
-# In[22]:
-
 import os
-
-
-# In[23]:
 
 world = '2b-prime'
 node_file_path = os.getcwd() + "\\input\\world " + world + "\\nodes_world_" + world + ".txt"
@@ -23,9 +16,6 @@ with open(node_file_path, 'r') as node_f:
             print_index += 1
         node_count += 1
 print node_count
-
-
-# In[24]:
 
 edge_file_path = os.getcwd() + "\\input\\world " + world + "\\edges_world_" + world + ".clq"
 adjacency_list = [[[], 0] for i in xrange(node_count + 1)]
@@ -52,13 +42,7 @@ with open(edge_file_path, 'r') as node_f:
             adjacency_list[node2][1] += 1
             edge_count += 1
 print edge_count
-        
 
-
-# print adjacency_list
-#     
-
-# In[25]:
 
 from operator import itemgetter
 max_degree = max(adjacency_list, key=itemgetter(1))[1]
