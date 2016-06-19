@@ -1,62 +1,69 @@
 import sys
-print sys.version
 import os
+
+print sys.version
 
 world = '2b-prime'
 node_file_path = os.getcwd() + "\\input\\world " + world + "\\nodes_world_" + world + ".txt"
-node_count = 0
 
-print_limit = 10
-print_index = 0
-print node_file_path
-with open(node_file_path, 'r') as node_f:
-    for line in node_f:
-        if print_index < print_limit:
-            print line
-            print_index += 1
-        node_count += 1
-print node_count
+print "file path: ", node_file_path
+
+# def parse_node_file(node_file_path):
+#     node_count = 0
+#     with open(node_file_path, 'r') as node_f:
+#         for line in node_f:
+#             node_count += 1
+#
+#     com_type_L = [0] * node_count
+#     with open(node_file_path, 'r') as node_f:
+#         for line in node_f:
+#             id0, com_type = line.split()
+#             com_type_L[int(id0)] = com_type
+#     return (node_count, com_type_L)
+
+def count_node(node_file_path):
+    node_count = 0
+    with open(node_file_path, 'r') as node_f:
+        for line in node_f:
+            node_count += 1
+    return node_count
+
+
+node_count= count_node(node_file_path)
 
 edge_file_path = os.getcwd() + "\\input\\world " + world + "\\edges_world_" + world + ".clq"
-adjacency_list = [[[], 0] for i in xrange(node_count + 1)]
-edge_count = 0
 
-print_limit = 10
-print_index = 0
-print node_file_path
+print "node file path: " + node_file_path
 
-prev_node = -1
-with open(edge_file_path, 'r') as node_f:
-    for line in node_f:
-        if print_index < print_limit:
-            print line
-            print_index += 1
-        fields = line.split()
-        if fields[0] == 'e':
-            node1 = int(fields[1])
-            node2 = int(fields[2])
-            method = fields[3]
-            adjacency_list[node1][0].append(node2)
-            adjacency_list[node2][0].append(node1)
-            adjacency_list[node1][1] += 1
-            adjacency_list[node2][1] += 1
-            edge_count += 1
-print edge_count
+def parse_edge_file(edge_file_path, node_count):
+    adjacency_list = [[] for i in xrange(node_count + 1)]
+    degree_list = [0 for i in xrange(node_count + 1)]
+    edge_count = 0
 
+    with open(edge_file_path, 'r') as node_f:
+        for line in node_f:
+            fields = line.split()
+            if fields[0] == 'e':
+                node1 = int(fields[1])
+                node2 = int(fields[2])
+                adjacency_list[node1].append(node2)
+                adjacency_list[node2].append(node1)
+                degree_list[node1] += 1
+                degree_list[node2] += 1
+                edge_count += 1
+    print edge_count
+    return (adjacency_list, degree_list, edge_count)
 
+adjacency_list, degree_list, edge_count = parse_edge_file(edge_file_path, node_count)
+adjacency_list = [list(a) for a in zip(adjacency_list, degree_list)]
 from operator import itemgetter
 max_degree = max(adjacency_list, key=itemgetter(1))[1]
-
-
-# In[26]:
 
 D_list = [[] for i in xrange(max_degree + 1)]
 for index, node in enumerate(adjacency_list):
     D_list[node[1]].append(index)
 print len(D_list)
 
-
-# In[27]:
 
 from collections import deque
 from bisect import bisect_left
@@ -84,27 +91,8 @@ for i in xrange(len(adjacency_list)):
             insert_index = bisect_left(D_list[D_index - 1], neigbour_index)
             D_list[D_index - 1].insert(insert_index, neigbour_index)
 
-
-# In[28]:
-
 print len(degeneracy_list)
 print len(set(degeneracy_list))
-
-
-# BronKerbosch1(R, P, X):
-#        if P and X are both empty:
-#            report R as a maximal clique
-#        for each vertex v in P:
-#            BronKerbosch1(R ⋃ {v}, P ⋂ N(v), X ⋂ N(v))
-#            P := P \ {v}
-#            X := X ⋃ {v}
-
-# In[ ]:
-
-
-
-
-# In[ ]:
 
 def BronKerboshc(R, P, X):
     if (not P and not X):
